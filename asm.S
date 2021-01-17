@@ -240,8 +240,12 @@ _start_bootstrap:
     lw a7, 16*REGBYTES(sp)
 .endm
 
+// see https://github.com/rust-embedded/riscv-rt/pull/57/files
+.option push
+.option norelax // to prevent an unsupported R_RISCV_ALIGN relocation from being generated
+
 .section .trap, "ax"
-.p2align 6 # 4-byte aligned
+//.p2align 6 # 4-byte aligned
 .globl _gd32vf103_trap_entry
 .weak _gd32vf103_trap_entry
 _gd32vf103_trap_entry:
@@ -259,6 +263,7 @@ _gd32vf103_trap_entry:
 	mv a0, sp
 # Calls the trap handler (defined in riscv-rt)
 # extern "C" fn start_trap_rust(trap_frame: *const TrapFrame)
+     	//mv a0, a0
 	jal ra, _start_trap_rust
 # Restore mcause, mepc and msubm
 	lw a0, 19*REGBYTES(sp)
@@ -272,9 +277,11 @@ _gd32vf103_trap_entry:
 # Free stack space
 	addi sp, sp, 20*REGBYTES
 	mret
+        //nop
+.option pop
 
 .section .trap, "ax"
-.align 2
+//.align 2
 .globl _gd32vf103_irq_entry
 .weak _gd32vf103_irq_entry
 _gd32vf103_irq_entry:
